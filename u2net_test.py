@@ -31,10 +31,12 @@ def normPRED(d):
     return dn
 
 def save_output(image_name,pred,d_dir):
-
+    print(pred.shape)
     predict = pred
     predict = predict.squeeze()
     predict_np = predict.cpu().data.numpy()
+
+    print(predict.shape)
 
     im = Image.fromarray(predict_np*255).convert('RGB')
     img_name = image_name.split(os.sep)[-1]
@@ -63,6 +65,7 @@ def main():
     model_dir = os.path.join(os.getcwd(), 'saved_models', model_name, model_name + '.pth')
 
     img_name_list = glob.glob(image_dir + os.sep + '*')
+    img_name_list = img_name_list[:1]
     print(img_name_list)
 
     # --------- 2. dataloader ---------
@@ -92,24 +95,39 @@ def main():
         net.load_state_dict(torch.load(model_dir, map_location='cpu'))
     net.eval()
 
+    print()
+
     # --------- 4. inference for each image ---------
     for i_test, data_test in enumerate(test_salobj_dataloader):
 
         print("inferencing:",img_name_list[i_test].split(os.sep)[-1])
 
         inputs_test = data_test['image']
+        print(inputs_test.shape)
         inputs_test = inputs_test.type(torch.FloatTensor)
+        print(inputs_test.shape)
 
         if torch.cuda.is_available():
             inputs_test = Variable(inputs_test.cuda())
         else:
             inputs_test = Variable(inputs_test)
 
-        d1,d2,d3,d4,d5,d6,d7= net(inputs_test)
+        print("inputs_test shape: ", inputs_test.shape)
+
+        d1,d2,d3,d4,d5,d6,d7 = net(inputs_test)
+        
+        ### ----- Test ----
+        # imgs = [d1,d2,d3,d4,d5,d6,d7]
+        # for im in imgs:
+        #     print(im.shape)
+        # #####
 
         # normalization
         pred = d1[:,0,:,:]
+        print("pred", pred.shape)
+
         pred = normPRED(pred)
+        print("norm pred", pred.shape)
 
         # save results to test_results folder
         if not os.path.exists(prediction_dir):
