@@ -1,0 +1,6 @@
+- Input as MLMultiArray
+	Pre-processing in swift:
+	1. Read image
+	2. Resize to 320 x 320
+	3. Convert to MLMultiArray
+	4. Convert to TensorLab
